@@ -5,6 +5,37 @@ const usersModule = (() => {
     const headers = new Headers()
     headers.set("Content-Type" , "application/json")
 
+    const handleError =  async (res)=>{
+        const resJson = await res.json()
+
+        switch (res.status){
+            case 200:
+                alert(resJson.message)
+                window.location.href = "/"
+                break;
+            case 201:
+                alert(resJson.message)
+                window.location.href = "/"
+                break;
+            case 400:
+                //パラメーター間違え
+                alert(resJson.error)
+                break;
+            case 404:
+                //リソースが見つからない場合
+                alert(resJson.error)
+                break;
+            case 500:
+                //サーバーの内部エラー
+                alert(resJson.error)
+                break;
+            default:
+                alert("何らかのエラーが発生しました")
+                break;
+
+        }
+    }
+
     return {
         fetchAllUsers: async () =>{
             const res = await fetch(BASE_URL)
@@ -39,11 +70,8 @@ const usersModule = (() => {
                 headers : headers,
                 body : JSON.stringify(body)
             })
+            return handleError(res)
 
-            const resJson = await res.json()
-
-            alert(resJson.message)
-            window.location.href = "/"
         },
         setExisitingValue : async(uid)=>{
             const res = await fetch(BASE_URL + "/" + uid)
@@ -69,11 +97,8 @@ const usersModule = (() => {
                 headers : headers,
                 body : JSON.stringify(body)
             })
+            return handleError(res)
 
-            const resJson = await res.json()
-
-            alert(resJson.message)
-            window.location.href = "/"
         },
         deleteUser: async (uid)=>{
             const ret = window.confirm("このユーザーを削除しますか？")
@@ -85,11 +110,10 @@ const usersModule = (() => {
                     method : "DELETE",
                     headers : headers,
                 })
-
-                const resJson = await res.json()
-                alert(resJson.message)
-                window.location.href = "/"
             }
+            const resJson = await res.json()
+            alert(resJson.message)
+            window.location.href = "/"
         }
     }
 })()
