@@ -13,7 +13,7 @@ app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname,'public')))
 
 // Get all users
-app.get('/api/v1/users' , (req, res)=>{
+app.get('https://secure-crag-88081.herokuapp.com/api/v1/users' , (req, res)=>{
     // Connect database
     const db = new sqlite3.Database(dbPath)
     db.all('SELECT * FROM users',(err , rows)=>{
@@ -24,7 +24,7 @@ app.get('/api/v1/users' , (req, res)=>{
 
 
 // GET a user
-app.get('/api/v1/users/:id' , (req, res)=>{
+app.get('https://secure-crag-88081.herokuapp.com/api/v1/users/:id' , (req, res)=>{
     // Connect database
     const id = req.params.id
     const db = new sqlite3.Database(dbPath)
@@ -40,7 +40,7 @@ app.get('/api/v1/users/:id' , (req, res)=>{
 
 
 // search users matching keyword
-app.get('/api/v1/search' , (req, res)=>{
+app.get('https://secure-crag-88081.herokuapp.com/api/v1/search' , (req, res)=>{
     // Connect database
     const db = new sqlite3.Database(dbPath)
     const keyword = req.query.q
@@ -64,7 +64,7 @@ const run = async (sql , db) =>{
 }
 
 //create a new user
-app.post('/api/v1/users' , async (req,res)=>{
+app.post('https://secure-crag-88081.herokuapp.com/api/v1/users' , async (req,res)=>{
     if(!req.body.name){
         res.status(400).send({error : "名前が入力されていません"})
     }else{
@@ -86,7 +86,7 @@ app.post('/api/v1/users' , async (req,res)=>{
 })
 
 //update a user
-app.put('/api/v1/users/:id' , async (req,res)=>{
+app.put('https://secure-crag-88081.herokuapp.com/api/v1/users/:id' , async (req,res)=>{
     if(!req.body.name){
         req.status(400).send({error : "名前が入力されていません"})
     }else{
@@ -117,7 +117,7 @@ app.put('/api/v1/users/:id' , async (req,res)=>{
 })
 
 //update a user
-app.delete('/api/v1/users/:id' , async (req,res)=>{
+app.delete('https://secure-crag-88081.herokuapp.com/api/v1/users/:id' , async (req,res)=>{
     // Connect database
     const db = new sqlite3.Database(dbPath)
     const id = req.params.id
