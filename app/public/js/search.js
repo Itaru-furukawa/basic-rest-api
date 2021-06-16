@@ -1,5 +1,5 @@
 const searchModule = (()=>{
-    const BASE_URL = "http://localhost:3000/api/v1/search"
+    const BASE_URL = "https://secure-crag-88081.herokuapp.com/api/v1/search"
     return {
         searchUsers: async() =>{
             //検索窓への入力値を取得

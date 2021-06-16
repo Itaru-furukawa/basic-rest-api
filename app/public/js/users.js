@@ -1,6 +1,6 @@
 //即時関数でモジュール化
 const usersModule = (() => {
-    const BASE_URL = "http://localhost:3000/api/v1/users"
+    const BASE_URL = "https://secure-crag-88081.herokuapp.com/api/v1/users"
     //ヘッダーの設定
     const headers = new Headers()
     headers.set("Content-Type" , "application/json")
