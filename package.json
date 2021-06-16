@@ -8,6 +8,10 @@
     "start" : "node-dev app/app.js",
     "connect" : "sqlite3 app/db/database.sqlite3"
   },
+  "engines": {
+    "node": "16.3.0",
+    "npm":  "7.15.1"
+  },
   "author": "furukawa",
   "license": "MIT",
   "dependencies": {
