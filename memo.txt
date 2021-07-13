@@ -1,0 +1,47 @@
+
+CREATE TABLE schedules(
+    id integer not null primary key,
+    member_number integer not null,
+    term text not null,
+    password text not null,
+    start_time text not null,
+    created_at text not null default (DATETIME('now', 'localtime')),
+    updated_at text not null default (DATETIME('now', 'localtime'))
+);
+
+create table disable(
+    id integer not null primary key,
+    schedule_id integer not null,
+    member_id integer not null,
+    disable_date text not null,
+    disable_time text not null,
+    created_at text not null DEFAULT (DATETIME('now' , 'localtime')),
+    updated_at text NOT NULL DEFAULT (DATETIME('now' , 'localtime'))
+);
+
+create table members(
+    id integer not null primary key,
+    schedule_id integer not null,
+    member_id integer not null,
+    name text not null,
+    place text,
+    created_at text not null DEFAULT (DATETIME('now' , 'localtime')),
+    updated_at text NOT NULL DEFAULT (DATETIME('now' , 'localtime'))
+);
+
+INSERT INTO schedules (member_number , term , password,start_time) VALUES (5,"2021-06-18,2021-06-30","ツクツクボウシ","10:00,21:00");
+INSERT INTO schedules (member_number , term , password,start_time) VALUES (3,"2021-12-21,2021-12-31","ニンジャツナ","17:00,20:00");
+
+INSERT INTO disable (schedule_id , member_id , disable_date , disable_time) VALUES (1,1 , "2021-06-20" ,  "10:00,12:00");
+INSERT INTO disable (schedule_id , member_id , disable_date , disable_time) VALUES (1,1 , "2021-06-20" ,  "15:00,17:00");
+
+INSERT INTO members (schedule_id , member_id , name , place) VALUES (1 , 1 , "かなみ" , "南行徳駅");
+
+
+UPDATE users SET 
+        name =
+            CASE
+                WHEN name == "Pack" THEN "hogehoge"
+                WHEN name == "aaa" THEN "fugafuga"
+            END
+        WHERE name IN ("Pack","aaa");

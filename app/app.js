@@ -50,8 +50,9 @@ app.get(schePath , (req, res)=>{
 app.get(schePath + '/:id', (req, res)=>{
     // Connect database
     const id = req.params.id
+    const query = req.query.q
     const db = new sqlite3.Database(dbPath)
-    db.get(`SELECT * FROM schedules WHERE id = ${id}`,(err , row)=>{
+    db.get(`SELECT * FROM schedules WHERE id = ${id} AND password = ${query}`,(err , row)=>{
         if(!row){
             res.status(404).send({error : "Not Found!"})
         }else{
@@ -73,10 +74,18 @@ app.post(schePath , async (req,res)=>{
         const term = req.body.term
         const password = req.body.password
         const start_time = req.body.start_time
+        let id = 0;
+        db.get(`SELECT max(id) FROM schedules`,(err , row)=>{
+            if(!row){
+                res.status(404).send({error : "Not Found!"})
+            }else{
+                id = row
+            }
+        })
 
         try{
             await run(`INSERT INTO schedules (member_number , term , password , start_time) VALUES ("${member_number}","${term}","${password}","${start_time}")`,db)
-            res.status(201).send({message : "新規ユーザーを作成しました"})
+            res.status(201).json(id)
         }catch(e){
             res.status(500).send({error : e})
         }
@@ -138,8 +147,13 @@ app.delete(schePath + '/:id' , async (req,res)=>{
 app.get(disPath , (req, res)=>{
     // Connect database
     const db = new sqlite3.Database(dbPath)
-    db.all('SELECT * FROM disable',(err , rows)=>{
-        res.json(rows)
+    const sche_id = req.query.scheId
+    db.all(`SELECT * FROM disable WHERE schedule_id = ${sche_id}`,(err , rows)=>{
+        if(!rows){
+            res.status(404).send({error : "Not Found!"})
+        }else{
+            res.status(200).json(rows)
+        }
     })
     db.close()
 })
@@ -163,12 +177,12 @@ app.get(disPath + '/:id', (req, res)=>{
 
 //create a new disable
 app.post(disPath , async (req,res)=>{
-    if(!req.body.schedule_id || !req.body.member_number || !req.body.term){
+    if(!req.query.scheId || !req.body.member_number || !req.body.term){
         res.status(400).send({error : "必須項目が入力されていません"})
     }else{
         // Connect database
         const db = new sqlite3.Database(dbPath)
-        const schedule_id = req.body.schedule_id + ""
+        const schedule_id = req.query.scheId + ""
         const member_number = req.body.member_number
         const term = req.body.term
         const disable_time = "NULL"
@@ -197,7 +211,7 @@ app.post(disPath , async (req,res)=>{
 
         try{
             await run(`INSERT INTO disable (schedule_id , member_id , disable_date , disable_time) VALUES ${VALS}`,db)
-            res.status(201).send({message : "新規ユーザーを作成しました"})
+            res.status(201).send({message : "新規作成しました"})
             //res.send(VALS)
         }catch(e){
             res.status(500).send({error : e})
@@ -219,7 +233,7 @@ app.put(disPath + '/:id' , async (req,res)=>{
             res.status(204).send({erroe : "指定されたユーザーが見つかりません"})
         }else{
             const disable_date = req.body.disable_date
-            const disable_time = req.body.disable_time
+            const disable_time = (req.body.disable_time).slice(1)
 
             /*
             UPDATE disable SET 
@@ -292,8 +306,13 @@ app.delete(disPath + '/:id' , async (req,res)=>{
 app.get(memPath , (req, res)=>{
     // Connect database
     const db = new sqlite3.Database(dbPath)
-    db.all(`SELECT * FROM members`,(err , rows)=>{
-        res.json(rows)
+    const sche_id = req.query.scheId
+    db.all(`SELECT * FROM members WHERE schedule_id = ${sche_id}`,(err , rows)=>{
+        if(!rows){
+            res.status(404).send({error : "Not Found!"})
+        }else{
+            res.status(200).json(rows)
+        }
     })
     db.close()
 })
@@ -316,24 +335,24 @@ app.get(memPath + '/:id', (req, res)=>{
 
 //create a new member
 app.post(memPath , async (req,res)=>{
-    if(!req.body.schedule_id || !req.body.member_number || !req.body.member_info){
+    if(!req.body.member_number || !req.body.member_info){
         res.status(400).send({error : "必須項目が入力されていません"})
     }else{
         // Connect database
         const db = new sqlite3.Database(dbPath)
-        const schedule_id = req.body.schedule_id
+        const schedule_id = req.query.scheId
         const member_number = req.body.member_number
         const member_info = req.body.member_info
         let VALS = ""
-        for(let i = 1; i <= member_number; i++){
-            VALS += `(${schedule_id} , ${i} ,'${member_info[i-1][0]}','${member_info[i-1][1]}')`
-            if(i != member_number){
+        for(let i = 0; i < member_number; i++){
+            VALS += `(${schedule_id} , ${i + 1} ,'${member_info[i]}')`
+            if(i != member_number - 1){
                 VALS += ","
             }
         }
 
         try{
-            await run(`INSERT INTO members (schedule_id , member_id , name , place) VALUES ${VALS}`,db)
+            await run(`INSERT INTO members (schedule_id , member_id , name) VALUES ${VALS}`,db)
             res.status(201).send({message : "新規ユーザーを作成しました"})
         }catch(e){
             res.status(500).send({error : e})
@@ -344,7 +363,7 @@ app.post(memPath , async (req,res)=>{
 
 //update a user
 app.put(memPath + '/:id' , async (req,res)=>{
-    if(!req.body.member_info){
+    if(!req.body.member_name){
         res.status(400).send({error : "必須項目が入力されていません"})
     }else{
         // Connect database
@@ -357,10 +376,11 @@ app.put(memPath + '/:id' , async (req,res)=>{
                 res.status(204).send({erroe : "指定されたユーザーが見つかりません"})
             }else{
                 const db = new sqlite3.Database(dbPath)
-                const member_info = req.body.member_info
+                const member_name = req.body.member_name
+                const member_place = req.body.member_place
 
                 try{
-                    await run(`UPDATE members SET name = "${member_info[0]}" , place = "${member_info[1]}" WHERE member_id = "${member_id}" AND schedule_id = "${schedule_id}" ` , db)
+                    await run(`UPDATE members SET name = "${member_name}" , place = "${member_place}" WHERE member_id = "${member_id}" AND schedule_id = "${schedule_id}" ` , db)
                     res.status(201).send({message : "ユーザーを更新しました"})
                 }catch(e){
                     res.status(500).send({error : e})
